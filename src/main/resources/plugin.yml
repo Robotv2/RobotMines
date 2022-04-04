@@ -1,0 +1,7 @@
+name: RobotMines
+version: '${project.version}'
+main: fr.robotv2.robotmines.RobotMines
+api-version: 1.18
+softdepend:
+  - WorldEdit
+  - FastAsyncWorldEdit
