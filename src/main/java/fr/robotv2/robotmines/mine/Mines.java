@@ -1,6 +1,7 @@
 package fr.robotv2.robotmines.mine;
 
 import fr.robotv2.robotmines.RobotMines;
+import fr.robotv2.robotmines.util.ColorUtil;
 import org.bukkit.Location;
 import org.bukkit.configuration.ConfigurationSection;
 import org.jetbrains.annotations.Nullable;
@@ -8,6 +9,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.Collection;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.logging.Level;
 
 public class Mines {
 
@@ -49,7 +51,11 @@ public class Mines {
             return null;
         }
 
-        return new Mine(name, firstBound, secondBound);
+        Mine mine = new Mine(name, firstBound, secondBound);
+        mines.put(name, mine);
+        ColorUtil.log(Level.INFO, "&La mine " + name + " a été initialisé avec succès.");
+
+        return mine;
     }
 
     public static void deleteMine(Mine mine) {
@@ -62,7 +68,7 @@ public class Mines {
     }
 
     public static void loadMines() {
-        ConfigurationSection section = RobotMines.get().getMinesFile().getConfigurationSection("mines");
+        ConfigurationSection section = RobotMines.get().getMinesFile().getConfigurationSection("");
 
         if(section == null) {
             return;

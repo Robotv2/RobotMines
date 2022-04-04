@@ -6,19 +6,18 @@ import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.block.Block;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.util.LinkedList;
 
 public class InternalBlockAdapter implements BlockAdapter {
 
     @Override
-    public Set<Block> getBlocks(Mine mine) {
+    public LinkedList<Block> getBlocks(Mine mine) {
 
         World world = mine.getFirstBound().getWorld();
         Location firstBound = mine.getFirstBound();
         Location secondBound = mine.getSecondBound();
 
-        Set<Block> blocks = new HashSet<>();
+        LinkedList<Block> blocks = new LinkedList<>();
 
         int topBlockX = Math.max(firstBound.getBlockX(), secondBound.getBlockX());
         int bottomBlockX = Math.min(firstBound.getBlockX(), secondBound.getBlockX());

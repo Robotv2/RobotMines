@@ -9,7 +9,7 @@ public class ResetPreparationRunnable extends BukkitRunnable {
 
     private final Mine mine;
     private final MineResetType type;
-    private int timer = 10;
+    private int timer = 11;
 
     public ResetPreparationRunnable(Mine mine, MineResetType type) {
         this.mine = mine;
@@ -19,12 +19,14 @@ public class ResetPreparationRunnable extends BukkitRunnable {
     @Override
     public void run() {
 
+        --timer;
+
         if(timer != 0) {
-            --timer;
             MineUtil.broadcast(mine, "&eLa mine &f" + mine.getName() + "&e se reinitialise dans &f" + timer + " &eseconde(s)");
             return;
         }
 
         type.reset(mine);
+        this.cancel();
     }
 }

@@ -1,6 +1,7 @@
 package fr.robotv2.robotmines.ui;
 
 import fr.robotv2.robotmines.RobotMines;
+import fr.robotv2.robotmines.ui.stock.MineBlockUi;
 import fr.robotv2.robotmines.ui.stock.MineMenuUi;
 import fr.robotv2.robotmines.util.ColorUtil;
 import org.bukkit.Bukkit;
@@ -28,6 +29,7 @@ public class GuiManager implements Listener {
 
         //Adding all the default GUIs
         this.addMenu(new MineMenuUi());
+        this.addMenu(new MineBlockUi());
     }
 
     @EventHandler

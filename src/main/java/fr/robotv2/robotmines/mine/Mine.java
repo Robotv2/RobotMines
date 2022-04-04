@@ -1,6 +1,7 @@
 package fr.robotv2.robotmines.mine;
 
 import fr.robotv2.robotmines.RobotMines;
+import fr.robotv2.robotmines.util.sort.BlockChanceComparator;
 import org.apache.commons.lang.Validate;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -10,8 +11,8 @@ import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitTask;
 
-import java.util.Collections;
-import java.util.Map;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.ThreadLocalRandom;
@@ -19,13 +20,15 @@ import java.util.stream.Collectors;
 
 public class Mine {
 
-    private final MineResetType type = MineResetType.FULL;
     private final String name;
+    private MineResetType type;
+
+    private final List<MineBlockChance> chances = new LinkedList<>();
 
     private final BukkitTask resetTask;
     private boolean reset;
 
-    private Set<Block> blocks;
+    private LinkedList<Block> blocks;
     private Location firstBound;
     private Location secondBound;
 
@@ -46,13 +49,16 @@ public class Mine {
         this.calculateAxis();
         this.calculateBlocks();
 
+        this.type = MineResetType.valueOf(RobotMines.get().getMinesFile().getString(name + ".reset-type", "FULL").toUpperCase());
+        this.chances.addAll(MineBlockChance.fromStringList(RobotMines.get().getMinesFile().getStringList(name + ".block-chances")));
+
         //Calculate new blocks & check for air blocks every 30 seconds.
         this.resetTask = Bukkit.getScheduler().runTaskTimer(RobotMines.get(), () -> {
             this.calculateBlocks();
             if(this.needReset()) {
                 this.reset();
             }
-        }, 20 * 30, 20 * 30);
+        }, 20 * 20, 20 * 20);
     }
 
     private void calculateAxis() {
@@ -72,8 +78,14 @@ public class Mine {
         return firstBound.getWorld();
     }
 
+    //Reset type
+
     public MineResetType getResetType() {
         return type;
+    }
+
+    public void setResetType(MineResetType type) {
+        this.type = type;
     }
 
     //Blocks
@@ -82,7 +94,7 @@ public class Mine {
         this.blocks = RobotMines.get().getBlockAdapter().getBlocks(this);
     }
 
-    public Set<Block> getBlocks() {
+    public LinkedList<Block> getBlocks() {
         return blocks;
     }
 
@@ -91,7 +103,7 @@ public class Mine {
     }
 
     public boolean needReset() {
-        return getBlocks().size() / 2 > getAirBlocks().size();
+        return getBlocks().size() / 2 < getAirBlocks().size();
     }
 
     //Boundaries
@@ -142,14 +154,32 @@ public class Mine {
 
     //Material
 
-    public Map<Material, Double> getBlockChance() {
-        return Collections.singletonMap(Material.STONE, 100D);
+    public void sortBlockChance() {
+        this.chances.sort(new BlockChanceComparator());
+    }
+
+    public List<MineBlockChance> getBlockChance() {
+        return chances;
+    }
+
+    public void addBlockChance(Material material, double chance) {
+        MineBlockChance blockChance = new MineBlockChance(material, chance);
+        this.chances.add(blockChance);
+        this.sortBlockChance();
+    }
+
+    public void removeBlockChance(Material material) {
+        getBlockChance().removeIf(blockChance -> blockChance.getMaterial() == material);
+    }
+
+    public boolean containsMaterial(Material material) {
+        return getBlockChance().stream().anyMatch(blockChance -> blockChance.getMaterial() == material);
     }
 
     public Material getRandomMaterial() {
-        return getBlockChance().entrySet().stream()
-                .filter(entry -> entry.getValue() > ThreadLocalRandom.current().nextInt(101))
-                .map(Map.Entry::getKey).findFirst()
+        return getBlockChance().stream()
+                .filter(entry -> entry.getChance() >= ThreadLocalRandom.current().nextInt(101))
+                .map(MineBlockChance::getMaterial).findFirst()
                 .orElse(Material.AIR);
     }
 
@@ -176,6 +206,8 @@ public class Mine {
     public void saveToFile() {
         RobotMines.get().getMinesFile().set(name + ".first-bound", getWorld().getBlockAt(firstBound).getLocation());
         RobotMines.get().getMinesFile().set(name + ".second-bound", getWorld().getBlockAt(secondBound).getLocation());
+        RobotMines.get().getMinesFile().set(name + ".reset-type", this.type.name());
+        RobotMines.get().getMinesFile().set(name + ".block-chances", MineBlockChance.toStringList(this.chances));
         RobotMines.get().saveMinesFile();
     }
 }

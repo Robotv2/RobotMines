@@ -21,9 +21,11 @@ public class WandListeners implements Listener {
     @EventHandler
     public void onInteract(PlayerInteractEvent event) {
 
-        if(event.getAction() != Action.RIGHT_CLICK_BLOCK || event.getAction() != Action.LEFT_CLICK_BLOCK) {
+        if(event.getAction() != Action.RIGHT_CLICK_BLOCK && event.getAction() != Action.LEFT_CLICK_BLOCK) {
             return;
         }
+
+
 
         Player player = event.getPlayer();
         Block block = event.getClickedBlock();

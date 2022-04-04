@@ -5,6 +5,7 @@ import fr.robotv2.robotmines.block.BlockAdapter;
 import fr.robotv2.robotmines.block.InternalBlockAdapter;
 import fr.robotv2.robotmines.block.WorldEditBlockAdapter;
 import fr.robotv2.robotmines.command.MineBaseCommand;
+import fr.robotv2.robotmines.listeners.MineListeners;
 import fr.robotv2.robotmines.listeners.SystemListeners;
 import fr.robotv2.robotmines.mine.Mine;
 import fr.robotv2.robotmines.mine.Mines;
@@ -27,11 +28,13 @@ public final class RobotMines extends JavaPlugin {
 
     @Override
     public void onEnable() {
-
+        instance = this;
         ConfigAPI.init(this);
         Mines.loadMines();
 
         new SystemListeners(this);
+        new MineListeners(this);
+
         this.wandManager = new WandManager(this);
         this.guiManager = new GuiManager(this);
 
@@ -40,17 +43,20 @@ public final class RobotMines extends JavaPlugin {
 
     @Override
     public void onDisable() {
-        getLogger().info("Cancelling all tasks.");
+        getLogger().info("Cancelling all tasks...");
         Bukkit.getScheduler().cancelTasks(this);
 
-        getLogger().info("Re-filling all the mines.");
-        Mines.getMines().stream().filter(Mine::isBeingReset).forEach(getBlockAdapter()::fillMine);
-        getLogger().info("Re-filling of all the mines done.");
+        getLogger().info("Saving all mines to files...");
+        Mines.getMines().forEach(Mine::saveToFile);
+
+        getLogger().info("Re-filling of all the mines...");
+        Mines.getMines().forEach(getBlockAdapter()::fillMine);
+
+        instance = null;
+        getLogger().info("Disabling plugin...");
     }
 
     public static RobotMines get() {
-        if(instance == null)
-            instance = new RobotMines();
         return instance;
     }
 

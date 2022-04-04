@@ -5,7 +5,6 @@ import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.scheduler.BukkitRunnable;
 
-import java.util.LinkedList;
 import java.util.Queue;
 
 public class ResetRunnable extends BukkitRunnable {
@@ -18,7 +17,7 @@ public class ResetRunnable extends BukkitRunnable {
     public ResetRunnable(Mine mine) {
         this.mine = mine;
         this.mine.setIsBeingReset(true);
-        this.queue = new LinkedList<>(mine.getBlocks());
+        this.queue = mine.getBlocks();
     }
 
     @Override

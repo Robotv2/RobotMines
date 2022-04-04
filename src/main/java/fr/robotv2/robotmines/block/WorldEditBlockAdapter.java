@@ -10,40 +10,21 @@ import com.sk89q.worldedit.regions.CuboidRegion;
 import com.sk89q.worldedit.regions.Region;
 import com.sk89q.worldedit.world.block.BlockState;
 import fr.robotv2.robotmines.mine.Mine;
-import org.bukkit.Location;
+import fr.robotv2.robotmines.mine.MineBlockChance;
+import fr.robotv2.robotmines.util.ColorUtil;
 import org.bukkit.Material;
-import org.bukkit.World;
-import org.bukkit.block.Block;
 
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.logging.Level;
 
-public class WorldEditBlockAdapter implements BlockAdapter {
-
-    @Override
-    public Set<Block> getBlocks(Mine mine) {
-
-        Set<Block> blocks = new HashSet<>();
-        World world = mine.getFirstBound().getWorld();
-
-        BlockVector3 firstBound = BukkitAdapter.asBlockVector(mine.getFirstBound());
-        BlockVector3 secondBound = BukkitAdapter.asBlockVector(mine.getSecondBound());
-        Region region = new CuboidRegion(firstBound, secondBound);
-
-        for(BlockVector3 vector : region.getChunkCubes()) {
-
-            Location blockLocation = BukkitAdapter.adapt(world, vector);
-            Block block = world.getBlockAt(blockLocation);
-            blocks.add(block);
-
-        }
-
-        return blocks;
-    }
+public class WorldEditBlockAdapter extends InternalBlockAdapter implements BlockAdapter {
 
     @Override
     public void fillMine(Mine mine) {
+
+        if(mine.getBlockChance().isEmpty()) {
+            return;
+        }
+
         com.sk89q.worldedit.world.World world = BukkitAdapter.adapt(mine.getFirstBound().getWorld());
 
         BlockVector3 firstBound = BukkitAdapter.asBlockVector(mine.getFirstBound());
@@ -51,19 +32,25 @@ public class WorldEditBlockAdapter implements BlockAdapter {
         Region region = new CuboidRegion(firstBound, secondBound);
 
         RandomPattern randomPattern = new RandomPattern();
+        double air = 1;
 
-        for(Map.Entry<Material, Double> entry : mine.getBlockChance().entrySet()) {
+        for(MineBlockChance blockChance : mine.getBlockChance()) {
 
-            BlockState blockState = BukkitAdapter.adapt(entry.getKey().createBlockData());
-            double chance = entry.getValue() / 100;
+            BlockState blockState = BukkitAdapter.adapt(blockChance.getMaterial().createBlockData());
+            double chance = blockChance.getChance() / 100;
+            air -= chance;
             randomPattern.add(blockState, chance);
 
         }
 
+        randomPattern.add(BukkitAdapter.adapt(Material.AIR.createBlockData()), air);
+
         try {
             EditSession session = WorldEdit.getInstance().newEditSession(world);
             session.setBlocks(region, randomPattern);
-        } catch (MaxChangedBlocksException ignored) {
+            session.close();
+        } catch (MaxChangedBlocksException exception) {
+            ColorUtil.log(Level.SEVERE, "&cNombre maximum de bloc pouvant être placé atteint.");
         }
     }
 }
