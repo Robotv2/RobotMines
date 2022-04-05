@@ -9,8 +9,6 @@ import java.util.Queue;
 
 public class ResetRunnable extends BukkitRunnable {
 
-    private final int MAX_BLOCK_PER_TICK = 20;
-
     private final Mine mine;
     private final Queue<Block> queue;
 
@@ -22,7 +20,7 @@ public class ResetRunnable extends BukkitRunnable {
 
     @Override
     public void run() {
-        for(int i = 0; i < MAX_BLOCK_PER_TICK; i++) {
+        for(int i = 0; i < mine.getMaxBlockPerTick(); i++) {
 
             Block block = queue.poll();
 

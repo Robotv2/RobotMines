@@ -11,6 +11,7 @@ import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.inventory.ClickType;
 import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.player.AsyncPlayerChatEvent;
 import org.bukkit.inventory.Inventory;
@@ -19,7 +20,6 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.UUID;
 
 public class MineBlockUi implements Gui, Listener {
 
@@ -55,7 +55,15 @@ public class MineBlockUi implements Gui, Listener {
 
         for(MineBlockChance mineBlockChance : mine.getBlockChance()) {
 
-            ItemStack item = new ItemAPI.ItemBuilder().setType(mineBlockChance.getMaterial()).setLore("", "&8> &cChance: " + mineBlockChance.getChance() + "%", "").build();
+            ItemStack item = new ItemAPI.ItemBuilder().setType(mineBlockChance.getMaterial())
+                    .setLore(
+                            "",
+                            "&8> &cChance: " + mineBlockChance.getChance() + "%",
+                            "",
+                            "&eClic-gauche pour retirer",
+                            "&eClic-droit pour re-définir la valeur")
+                    .build();
+
             inv.setItem(index, item);
             ++index;
 
@@ -63,7 +71,7 @@ public class MineBlockUi implements Gui, Listener {
     }
 
     @Override
-    public void onClick(Player player, Inventory inv, ItemStack current, int slot) {
+    public void onClick(Player player, Inventory inv, ItemStack current, int slot, ClickType type) {
 
         Mine mine = this.selected.get(player);
         Material material = current.getType();
@@ -73,17 +81,25 @@ public class MineBlockUi implements Gui, Listener {
             if(!material.isBlock()) return;
             if(mine.containsMaterial(material)) return;
 
-            this.blockChance.put(player, material);
-            player.closeInventory();
-            ColorUtil.sendMessage(player, "&aÉcrivez dans le chat le pourcentage souhaité.");
+            this.needChanceValue(player, material);
 
         } else {
             if(current.isSimilar(ItemConstant.getEmpty())) return;
             mine.removeBlockChance(material);
 
+            if(type == ClickType.RIGHT) {
+                this.needChanceValue(player, material);
+                return;
+            }
         }
 
         this.contents(player, inv, mine);
+    }
+
+    public void needChanceValue(Player player, Material material) {
+        this.blockChance.put(player, material);
+        player.closeInventory();
+        ColorUtil.sendMessage(player, "&aÉcrivez dans le chat le pourcentage souhaité.");
     }
 
     @EventHandler
@@ -110,7 +126,4 @@ public class MineBlockUi implements Gui, Listener {
             blockChance.remove(player);
         }
     }
-
-    @Override
-    public void onClose(Player player, InventoryCloseEvent event) {}
 }

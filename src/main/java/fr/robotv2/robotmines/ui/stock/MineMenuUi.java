@@ -5,7 +5,10 @@ import fr.robotv2.robotmines.mine.Mine;
 import fr.robotv2.robotmines.mine.MineResetType;
 import fr.robotv2.robotmines.ui.Gui;
 import fr.robotv2.robotmines.ui.ItemConstant;
+import fr.robotv2.robotmines.util.ItemAPI;
+import org.bukkit.Material;
 import org.bukkit.entity.Player;
+import org.bukkit.event.inventory.ClickType;
 import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
@@ -14,6 +17,17 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class MineMenuUi implements Gui {
+
+    private final ItemStack RESET_TYPE_GRADUAL = new ItemAPI.ItemBuilder().setType(Material.GOLD_BLOCK)
+            .setName("&eMode de reset: &e&lGRADUAL").build();
+    private final ItemStack RESET_TYPE_FULL = new ItemAPI.ItemBuilder().setType(Material.GOLD_BLOCK)
+            .setName("&eMode de reset: &e&lFULL").build();
+    private final ItemStack BLOCK_CHANCE = new ItemAPI.ItemBuilder().setType(Material.STONE)
+            .setName("&fChanger les blocs dans la mine.").build();
+    private final ItemStack RESET_ITEM = new ItemAPI.ItemBuilder().setType(Material.EMERALD_BLOCK)
+            .setName("&aCliquez-ici pour reinitialiser la mine.").build();
+    private final ItemStack OPTION_ITEM = new ItemAPI.ItemBuilder().setType(Material.REPEATER)
+            .setName("&cOptions de la mine.").build();
 
     private final Map<Player, Mine> selected = new HashMap<>();
 
@@ -37,17 +51,21 @@ public class MineMenuUi implements Gui {
             inv.setItem(i, ItemConstant.getEmpty());
         }
 
-        inv.setItem(10, ItemConstant.getResetItem());
-        inv.setItem(13, ItemConstant.getBlockChance());
-        inv.setItem(16, ItemConstant.getResetType(mine.getResetType()));
+        inv.setItem(0, OPTION_ITEM);
+        inv.setItem(10, RESET_ITEM);
+        inv.setItem(13, BLOCK_CHANCE);
+        inv.setItem(16, this.getResetType(mine.getResetType()));
     }
 
     @Override
-    public void onClick(Player player, Inventory inv, ItemStack current, int slot) {
+    public void onClick(Player player, Inventory inv, ItemStack current, int slot, ClickType type) {
 
         Mine mine = selected.get(player);
 
         switch (slot) {
+            case 0:
+                RobotMines.get().getGuiManager().open(player, MineOptionUi.class, mine);
+                break;
             case 10:
                 mine.reset();
                 player.closeInventory();
@@ -58,14 +76,19 @@ public class MineMenuUi implements Gui {
             case 16:
                 MineResetType change = mine.getResetType() == MineResetType.FULL ? MineResetType.GRADUAL : MineResetType.FULL;
                 mine.setResetType(change);
-                inv.setItem(16, ItemConstant.getResetType(change));
+                inv.setItem(16, this.getResetType(change));
                 break;
         }
-
     }
 
-    @Override
-    public void onClose(Player player, InventoryCloseEvent event) {
-        selected.remove(player);
+    public ItemStack getResetType(MineResetType type) {
+        switch (type) {
+            case FULL:
+                return RESET_TYPE_FULL;
+            case GRADUAL:
+                return RESET_TYPE_GRADUAL;
+            default:
+                throw new IllegalArgumentException();
+        }
     }
 }
