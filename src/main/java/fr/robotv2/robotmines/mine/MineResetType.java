@@ -21,10 +21,8 @@ public enum MineResetType {
             return;
         }
 
-        if(!preparation.containsKey(mine)) {
-            ResetPreparationRunnable resetPreparationRunnable = new ResetPreparationRunnable(mine, this);
-            BukkitTask task = resetPreparationRunnable.runTaskTimer(RobotMines.get(), 20L, 20L);
-            preparation.put(mine, task);
+        if(needPreparation(mine)) {
+            this.prepareMineToReset(mine);
             return;
         }
 
@@ -39,6 +37,16 @@ public enum MineResetType {
                 RobotMines.get().getBlockAdapter().fillMine(mine);
                 break;
         }
+    }
+
+    private boolean needPreparation(Mine mine) {
+        return !preparation.containsKey(mine);
+    }
+
+    private void prepareMineToReset(Mine mine) {
+        ResetPreparationRunnable resetPreparationRunnable = new ResetPreparationRunnable(mine, this);
+        BukkitTask task = resetPreparationRunnable.runTaskTimer(RobotMines.get(), 20L, 20L);
+        preparation.put(mine, task);
     }
 
     private void resetGradual(Mine mine) {
