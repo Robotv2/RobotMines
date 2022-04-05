@@ -51,7 +51,7 @@ public class MineBaseCommand extends BaseCommand {
     @CommandCompletion("@mines")
     public void onDelete(CommandSender sender, Mine mine) {
 
-        if(mine == null) {
+        if(!Mines.exist(mine)) {
             ColorUtil.sendMessage(sender, "&cCette mine n'existe pas.");
             return;
         }
@@ -64,6 +64,12 @@ public class MineBaseCommand extends BaseCommand {
     @CommandPermission("robotmines.command.reset")
     @CommandCompletion("@mines")
     public void onReset(CommandSender sender, Mine mine, @Optional MineResetType type) {
+
+        if(!Mines.exist(mine)) {
+            ColorUtil.sendMessage(sender, "&cCette mine n'existe pas.");
+            return;
+        }
+
         if(type == null) {
             mine.reset();
         } else {
@@ -75,6 +81,31 @@ public class MineBaseCommand extends BaseCommand {
     @CommandPermission("robotmines.command.menu")
     @CommandCompletion("@mines")
     public void onOpenMenu(Player player, Mine mine) {
+
+        if(!Mines.exist(mine)) {
+            ColorUtil.sendMessage(player, "&cCette mine n'existe pas.");
+            return;
+        }
+
         RobotMines.get().getGuiManager().open(player, MineMenuUi.class, mine);
+    }
+
+    @Subcommand("info")
+    @CommandPermission("robotmines.command.info")
+    @CommandCompletion("@mines")
+    public void onInfo(Player player, Mine mine) {
+
+        if(!Mines.exist(mine)) {
+            ColorUtil.sendMessage(player, "&cCette mine n'existe pas.");
+            return;
+        }
+
+        int requiredBlock = (int) ((mine.getBlocks().size() - mine.getAirBlocks().size()) - (mine.getBlocks().size() * (mine.getResetPourcentage() / 100)));
+
+        ColorUtil.sendMessage(player, "&8&l&m--------------", false);
+        ColorUtil.sendMessage(player, "&e&lBLOCS: &e" + mine.getBlocks().size(), false);
+        ColorUtil.sendMessage(player, "&e&lAIR: &e" + mine.getBlocks().size(), false);
+        ColorUtil.sendMessage(player, "&e&lBloc(s) nécessaire(s): &e" + Math.max(0, requiredBlock), false);
+        ColorUtil.sendMessage(player, "&8&l&m--------------", false);
     }
 }

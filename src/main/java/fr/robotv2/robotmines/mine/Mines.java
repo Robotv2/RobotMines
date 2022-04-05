@@ -36,6 +36,10 @@ public class Mines {
         return mines.containsKey(name.toLowerCase());
     }
 
+    public static boolean exist(Mine mine) {
+        return mine != null && exist(mine.getName());
+    }
+
     @Nullable
     public static Mine loadMine(String name) {
 
