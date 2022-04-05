@@ -48,6 +48,19 @@ public class GuiManager implements Listener {
         menu.onClick(player, e.getInventory(), item, e.getRawSlot(), e.getClick());
     }
 
+    @EventHandler
+    public void onClose(InventoryCloseEvent e) {
+        Player player = (Player) e.getPlayer();
+        UUID playerUUID = e.getPlayer().getUniqueId();
+
+        if(players.containsKey(playerUUID)) {
+            Bukkit.getScheduler().runTaskLater(RobotMines.get(), () -> {
+                if (player.getOpenInventory().getType() != InventoryType.CHEST)
+                    players.remove(playerUUID);
+            }, 2L);
+        }
+    }
+
     public void addMenu(Gui gui){
         menus.put(gui.getClass(), gui);
     }
