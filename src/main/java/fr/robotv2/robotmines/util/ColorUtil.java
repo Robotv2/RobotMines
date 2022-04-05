@@ -8,8 +8,14 @@ import java.util.logging.Level;
 
 public class ColorUtil {
 
+    public static void sendMessage(CommandSender sender, String message, boolean prefix) {
+        if(prefix)
+            message = "&c&lMINES &8- " + message;
+        sender.sendMessage(colorize(message));
+    }
+
     public static void sendMessage(CommandSender sender, String message) {
-        sender.sendMessage(colorize("&c&lMINES &8-" + message));
+        ColorUtil.sendMessage(sender, message, true);
     }
 
     public static String colorize(String message) {
