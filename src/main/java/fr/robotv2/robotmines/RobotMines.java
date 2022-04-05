@@ -93,7 +93,7 @@ public final class RobotMines extends JavaPlugin {
     public void registerCommand() {
         PaperCommandManager manager = new PaperCommandManager(this);
         manager.getCommandContexts().registerContext(Mine.class, c -> {
-            return Mines.getByName(c.getFirstArg());
+            return Mines.getByName(c.popFirstArg());
         });
         manager.getCommandCompletions().registerCompletion("mines", c -> {
             return Mines.getMines().stream().map(Mine::getName).collect(Collectors.toSet());

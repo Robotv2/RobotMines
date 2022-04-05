@@ -1,12 +1,10 @@
 package fr.robotv2.robotmines.command;
 
 import co.aikar.commands.BaseCommand;
-import co.aikar.commands.annotation.CommandAlias;
-import co.aikar.commands.annotation.CommandCompletion;
-import co.aikar.commands.annotation.CommandPermission;
-import co.aikar.commands.annotation.Subcommand;
+import co.aikar.commands.annotation.*;
 import fr.robotv2.robotmines.RobotMines;
 import fr.robotv2.robotmines.mine.Mine;
+import fr.robotv2.robotmines.mine.MineResetType;
 import fr.robotv2.robotmines.mine.Mines;
 import fr.robotv2.robotmines.ui.stock.MineMenuUi;
 import fr.robotv2.robotmines.util.ColorUtil;
@@ -62,15 +60,14 @@ public class MineBaseCommand extends BaseCommand {
         ColorUtil.sendMessage(sender, "&aVous venez de supprimer la mine: " + mine.getName());
     }
 
-    @Subcommand("forcereset")
+    @Subcommand("reset")
     @CommandPermission("robotmines.command.reset")
     @CommandCompletion("@mines")
-    public void onReset(Player player) {
-        Mine mine = Mines.getByLocation(player.getLocation());
-        if(mine == null) {
-            ColorUtil.sendMessage(player, "&cVous ne vous trouvez dans aucune mine.");
-        } else {
+    public void onReset(CommandSender sender, Mine mine, @Optional MineResetType type) {
+        if(type == null) {
             mine.reset();
+        } else {
+            mine.reset(type);
         }
     }
 
