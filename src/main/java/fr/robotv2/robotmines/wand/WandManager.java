@@ -16,18 +16,14 @@ import java.util.UUID;
 public class WandManager {
 
     private final Map<UUID, MineBuilder> builders = new HashMap<>();
-    private ItemStack wand;
+    private final ItemStack wand;
 
     public WandManager(JavaPlugin plugin) {
-        this.buildWand();
-        plugin.getServer().getPluginManager().registerEvents(new WandListeners(this), plugin);
-    }
-
-    public void buildWand() {
         this.wand = new ItemAPI.ItemBuilder().setType(Material.STICK).setName("&d&lMine Wand")
-                .setLore("&eRight-click to define the first-bound", "&eLeft-click to define the second-bound")
+                .setLore("&eClic-droit pour définir la première bordure", "&eClic gauche pour définir la seconde bordure")
                 .addEnchant(Enchantment.ARROW_FIRE, 1, false).addFlags(ItemFlag.HIDE_ENCHANTS, ItemFlag.HIDE_ATTRIBUTES)
                 .build();
+        plugin.getServer().getPluginManager().registerEvents(new WandListeners(this), plugin);
     }
 
     public ItemStack getWand() {
