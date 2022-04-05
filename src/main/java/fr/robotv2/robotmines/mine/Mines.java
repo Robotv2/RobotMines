@@ -17,6 +17,10 @@ public class Mines {
 
     private static final Map<String, Mine> mines = new ConcurrentHashMap<>();
 
+    public static Collection<Mine> getMines() {
+        return mines.values();
+    }
+
     @Nullable
     public static Mine getByName(String name) {
         Mine mine = mines.get(name.toLowerCase());
@@ -36,6 +40,9 @@ public class Mines {
         return mines.containsKey(name.toLowerCase());
     }
 
+    /**
+     * Permit to check if a mine object is valid.
+     */
     public static boolean exist(Mine mine) {
         return mine != null && exist(mine.getName());
     }
@@ -57,18 +64,9 @@ public class Mines {
 
         Mine mine = new Mine(name, firstBound, secondBound);
         mines.put(name, mine);
-        ColorUtil.log(Level.INFO, "&La mine " + name + " a été initialisé avec succès.");
+        ColorUtil.log(Level.INFO, "&eLa mine " + name + " a été initialisé avec succès.");
 
         return mine;
-    }
-
-    public static void deleteMine(Mine mine) {
-        mines.remove(mine.getName());
-        mine.stopTask();
-        RobotMines.get().getMinesFile().set(mine.getName() + ".first-bound", null);
-        RobotMines.get().getMinesFile().set(mine.getName() + ".second-bound", null);
-        RobotMines.get().getMinesFile().set(mine.getName(), null);
-        RobotMines.get().saveMinesFile();
     }
 
     public static void loadMines() {
@@ -81,7 +79,16 @@ public class Mines {
         section.getKeys(false).forEach(Mines::loadMine);
     }
 
-    public static Collection<Mine> getMines() {
-        return mines.values();
+    public static void deleteMine(Mine mine) {
+        mines.remove(mine.getName());
+        mine.stopTask();
+        RobotMines.get().getMinesFile().set(mine.getName() + ".first-bound", null);
+        RobotMines.get().getMinesFile().set(mine.getName() + ".second-bound", null);
+        RobotMines.get().getMinesFile().set(mine.getName() + ".reset-type", null);
+        RobotMines.get().getMinesFile().set(mine.getName() + ".block-chances", null);
+        RobotMines.get().getMinesFile().set(mine.getName() + ".reset-pourcentage", null);
+        RobotMines.get().getMinesFile().set(mine.getName() + ".max-block-per-tick", null);
+        RobotMines.get().getMinesFile().set(mine.getName(), null);
+        RobotMines.get().saveMinesFile();
     }
 }
