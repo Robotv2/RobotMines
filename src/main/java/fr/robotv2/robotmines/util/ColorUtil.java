@@ -9,7 +9,7 @@ import java.util.logging.Level;
 public class ColorUtil {
 
     public static void sendMessage(CommandSender sender, String message) {
-        sender.sendMessage(colorize(message));
+        sender.sendMessage(colorize("&c&lMINES &8-" + message));
     }
 
     public static String colorize(String message) {
