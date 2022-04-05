@@ -3,6 +3,7 @@ package fr.robotv2.robotmines.ui;
 import fr.robotv2.robotmines.RobotMines;
 import fr.robotv2.robotmines.ui.stock.MineBlockUi;
 import fr.robotv2.robotmines.ui.stock.MineMenuUi;
+import fr.robotv2.robotmines.ui.stock.MineOptionUi;
 import fr.robotv2.robotmines.util.ColorUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
@@ -30,6 +31,7 @@ public class GuiManager implements Listener {
         //Adding all the default GUIs
         this.addMenu(new MineMenuUi());
         this.addMenu(new MineBlockUi(plugin));
+        this.addMenu(new MineOptionUi(plugin));
     }
 
     @EventHandler
@@ -43,24 +45,7 @@ public class GuiManager implements Listener {
 
         e.setCancelled(true);
         Gui menu = players.get(playerUUID);
-        menu.onClick(player, e.getInventory(), item, e.getRawSlot());
-    }
-
-    @EventHandler
-    public void onClose(InventoryCloseEvent e) {
-        Player player = (Player) e.getPlayer();
-        UUID playerUUID = e.getPlayer().getUniqueId();
-
-        if(players.containsKey(playerUUID)) {
-
-            Gui menu = players.get(playerUUID);
-            menu.onClose(player, e);
-
-            Bukkit.getScheduler().runTaskLater(RobotMines.get(), () -> {
-                if(player.getOpenInventory().getType() != InventoryType.CHEST)
-                    players.remove(playerUUID);
-            }, 2L);
-        }
+        menu.onClick(player, e.getInventory(), item, e.getRawSlot(), e.getClick());
     }
 
     public void addMenu(Gui gui){
