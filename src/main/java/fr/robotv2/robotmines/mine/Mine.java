@@ -11,10 +11,7 @@ import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitTask;
 
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
 
@@ -177,10 +174,19 @@ public class Mine {
     }
 
     public Material getRandomMaterial() {
-        return getBlockChance().stream()
-                .filter(entry -> entry.getChance() >= ThreadLocalRandom.current().nextInt(101))
-                .map(MineBlockChance::getMaterial).findFirst()
-                .orElse(Material.AIR);
+
+        int currentChance = 0;
+        int randomValue = ThreadLocalRandom.current().nextInt(101);
+
+        for(MineBlockChance blockChance : getBlockChance()) {
+            if(blockChance.getChance() + currentChance > randomValue) {
+                return blockChance.getMaterial();
+            } else {
+                currentChance += blockChance.getChance();
+            }
+        }
+
+        return Material.AIR;
     }
 
     public boolean contains(int x, int y, int z) {
