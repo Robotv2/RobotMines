@@ -29,7 +29,7 @@ public class GuiManager implements Listener {
 
         //Adding all the default GUIs
         this.addMenu(new MineMenuUi());
-        this.addMenu(new MineBlockUi());
+        this.addMenu(new MineBlockUi(plugin));
     }
 
     @EventHandler

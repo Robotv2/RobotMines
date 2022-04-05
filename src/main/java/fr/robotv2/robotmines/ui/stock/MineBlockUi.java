@@ -1,16 +1,21 @@
 package fr.robotv2.robotmines.ui.stock;
 
+import fr.robotv2.robotmines.RobotMines;
 import fr.robotv2.robotmines.mine.Mine;
 import fr.robotv2.robotmines.mine.MineBlockChance;
 import fr.robotv2.robotmines.ui.Gui;
 import fr.robotv2.robotmines.ui.ItemConstant;
+import fr.robotv2.robotmines.util.ColorUtil;
 import fr.robotv2.robotmines.util.ItemAPI;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
+import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryCloseEvent;
+import org.bukkit.event.player.AsyncPlayerChatEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.plugin.java.JavaPlugin;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -19,6 +24,11 @@ import java.util.UUID;
 public class MineBlockUi implements Gui, Listener {
 
     private final Map<Player, Mine> selected = new HashMap<>();
+    private final Map<Player, Material> blockChance = new HashMap<>();
+
+    public MineBlockUi(JavaPlugin plugin) {
+        plugin.getServer().getPluginManager().registerEvents(this, plugin);
+    }
 
     @Override
     public String getName(Player player, Object... objects) {
@@ -62,7 +72,10 @@ public class MineBlockUi implements Gui, Listener {
 
             if(!material.isBlock()) return;
             if(mine.containsMaterial(material)) return;
-            mine.addBlockChance(material, 10);
+
+            this.blockChance.put(player, material);
+            player.closeInventory();
+            ColorUtil.sendMessage(player, "&aÉcrivez dans le chat le pourcentage souhaité.");
 
         } else {
             if(current.isSimilar(ItemConstant.getEmpty())) return;
@@ -71,6 +84,31 @@ public class MineBlockUi implements Gui, Listener {
         }
 
         this.contents(player, inv, mine);
+    }
+
+    @EventHandler
+    public void onChat(AsyncPlayerChatEvent event) {
+
+        Player player = event.getPlayer();
+
+        if(blockChance.containsKey(event.getPlayer())) {
+
+            event.setCancelled(true);
+
+            Mine mine = selected.get(player);
+            Material material = blockChance.get(player);
+            String toParse = event.getMessage().split(" ")[0];
+
+            try {
+                double chance = Double.parseDouble(toParse);
+                mine.addBlockChance(material, chance);
+                RobotMines.get().getGuiManager().open(player, MineBlockUi.class, mine);
+            } catch (NumberFormatException exception) {
+                ColorUtil.sendMessage(player, "&c'" + toParse + "' n'est pas un nombre valide !");
+            }
+
+            blockChance.remove(player);
+        }
     }
 
     @Override
