@@ -2,9 +2,7 @@ package fr.robotv2.robotmines.listeners;
 
 import fr.robotv2.robotmines.event.MineEnteredEvent;
 import fr.robotv2.robotmines.event.MineLeftEvent;
-import fr.robotv2.robotmines.mine.Mine;
 import fr.robotv2.robotmines.util.ColorUtil;
-import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -17,19 +15,11 @@ public class MineListeners implements Listener {
 
     @EventHandler
     public void onMineEnter(MineEnteredEvent event) {
-
-        Player player = event.getPlayer();
-        Mine mine = event.getMine();
-
-        ColorUtil.sendMessage(player, "&aVous venez de rentrer dans la mine: " + mine.getName());
+        ColorUtil.sendMessage(event.getPlayer(), "&aVous venez de rentrer dans la mine: " + event.getMine().getName());
     }
 
     @EventHandler
     public void onMineLeave(MineLeftEvent event) {
-
-        Player player = event.getPlayer();
-        Mine mine = event.getMine();
-
-        ColorUtil.sendMessage(player, "&cVous venez de sortir de la mine: " + mine.getName());
+        ColorUtil.sendMessage(event.getPlayer(), "&cVous venez de sortir de la mine: " + event.getMine().getName());
     }
 }
