@@ -22,16 +22,15 @@ public class MineHelper {
     @Nullable
     public Mine getByName(String name) {
         Mine mine = mines.get(name.toLowerCase());
-        if(mine == null)
+        if(mine == null) {
             mine = this.loadMine(name);
+        }
         return mine;
     }
 
     @Nullable
     public Mine getByLocation(Location location) {
-        return this.getMines().stream()
-                .filter(mine -> mine.contains(location))
-                .findFirst().orElse(null);
+        return this.getMines().stream().filter(mine -> mine.contains(location)).findFirst().orElse(null);
     }
 
     public boolean exist(String name) {
