@@ -6,7 +6,6 @@ import fr.robotv2.robotmines.event.MineLeftEvent;
 import fr.robotv2.robotmines.mine.Mine;
 import fr.robotv2.robotmines.mine.MineHelper;
 import org.bukkit.Bukkit;
-import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
 import org.bukkit.event.EventHandler;
@@ -31,22 +30,17 @@ public class SystemListeners implements Listener {
 
     @EventHandler(ignoreCancelled = true, priority = EventPriority.NORMAL)
     public void onBreak(BlockBreakEvent event) {
-
         Player player = event.getPlayer();
-        Block block = event.getBlock();
+        this.mineHelper.getMines().stream().filter(mine -> !mine.contains(player)).forEach(mine -> {
 
-        for(Mine mine : this.mineHelper.getMines()) {
-
-            if(!mine.contains(block)) {
-                continue;
-            }
-
-            BlockBreakInMineEvent blockBreakInMineEvent = new BlockBreakInMineEvent(player, mine, block);
+            BlockBreakInMineEvent blockBreakInMineEvent = new BlockBreakInMineEvent(player, mine, event.getBlock());
             this.callEvent(blockBreakInMineEvent);
+
             if(blockBreakInMineEvent.isCancelled()) {
                 event.setCancelled(true);
             }
-        }
+
+        });
     }
 
     @EventHandler(ignoreCancelled = true, priority = EventPriority.NORMAL)
