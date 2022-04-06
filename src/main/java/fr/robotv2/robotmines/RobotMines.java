@@ -8,7 +8,7 @@ import fr.robotv2.robotmines.command.MineBaseCommand;
 import fr.robotv2.robotmines.listeners.MineListeners;
 import fr.robotv2.robotmines.listeners.SystemListeners;
 import fr.robotv2.robotmines.mine.Mine;
-import fr.robotv2.robotmines.mine.Mines;
+import fr.robotv2.robotmines.mine.MineHelper;
 import fr.robotv2.robotmines.ui.GuiManager;
 import fr.robotv2.robotmines.util.config.ConfigAPI;
 import fr.robotv2.robotmines.wand.WandManager;
@@ -23,16 +23,20 @@ public final class RobotMines extends JavaPlugin {
     private static RobotMines instance;
     private BlockAdapter blockAdapter;
 
+    private MineHelper mineHelper;
     private WandManager wandManager;
     private GuiManager guiManager;
 
     @Override
     public void onEnable() {
+
         instance = this;
         ConfigAPI.init(this);
-        Mines.loadMines();
 
-        new SystemListeners(this);
+        this.mineHelper = new MineHelper();
+        mineHelper.loadMines();
+
+        new SystemListeners(this, this.mineHelper);
         new MineListeners(this);
 
         this.wandManager = new WandManager(this);
@@ -47,10 +51,10 @@ public final class RobotMines extends JavaPlugin {
         Bukkit.getScheduler().cancelTasks(this);
 
         getLogger().info("Saving all mines to files...");
-        Mines.getMines().forEach(Mine::saveToFile);
+        mineHelper.getMines().forEach(Mine::saveToFile);
 
         getLogger().info("Re-filling of all the mines...");
-        Mines.getMines().forEach(getBlockAdapter()::fillMine);
+        mineHelper.getMines().forEach(getBlockAdapter()::fillMine);
 
         instance = null;
         getLogger().info("Disabling plugin...");
@@ -78,6 +82,10 @@ public final class RobotMines extends JavaPlugin {
         return guiManager;
     }
 
+    public MineHelper getMineHelper() {
+        return mineHelper;
+    }
+
     //<- MINES FILE ->
 
     public FileConfiguration getMinesFile() {
@@ -93,11 +101,11 @@ public final class RobotMines extends JavaPlugin {
     public void registerCommand() {
         PaperCommandManager manager = new PaperCommandManager(this);
         manager.getCommandContexts().registerContext(Mine.class, c -> {
-            return Mines.getByName(c.popFirstArg());
+            return getMineHelper().getByName(c.popFirstArg());
         });
         manager.getCommandCompletions().registerCompletion("mines", c -> {
-            return Mines.getMines().stream().map(Mine::getName).collect(Collectors.toSet());
+            return getMineHelper().getMines().stream().map(Mine::getName).collect(Collectors.toSet());
         });
-        manager.registerCommand(new MineBaseCommand());
+        manager.registerCommand(new MineBaseCommand(this.mineHelper));
     }
 }

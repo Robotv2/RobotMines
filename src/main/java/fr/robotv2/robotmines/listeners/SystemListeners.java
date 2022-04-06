@@ -4,7 +4,7 @@ import fr.robotv2.robotmines.event.BlockBreakInMineEvent;
 import fr.robotv2.robotmines.event.MineEnteredEvent;
 import fr.robotv2.robotmines.event.MineLeftEvent;
 import fr.robotv2.robotmines.mine.Mine;
-import fr.robotv2.robotmines.mine.Mines;
+import fr.robotv2.robotmines.mine.MineHelper;
 import org.bukkit.Bukkit;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
@@ -18,8 +18,11 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 public class SystemListeners implements Listener {
 
-    public SystemListeners(JavaPlugin plugin) {
+    private final MineHelper mineHelper;
+
+    public SystemListeners(JavaPlugin plugin, MineHelper mineHelper) {
         plugin.getServer().getPluginManager().registerEvents(this, plugin);
+        this.mineHelper = mineHelper;
     }
 
     public void callEvent(Event event) {
@@ -32,7 +35,7 @@ public class SystemListeners implements Listener {
         Player player = event.getPlayer();
         Block block = event.getBlock();
 
-        for(Mine mine : Mines.getMines()) {
+        for(Mine mine : this.mineHelper.getMines()) {
 
             if(!mine.contains(block)) {
                 continue;
@@ -60,8 +63,8 @@ public class SystemListeners implements Listener {
         double blockZTo = event.getTo().getZ();
 
         if (blockXFrom != blockXTo || blockYFrom != blockYTo || blockZFrom != blockZTo) {
-            Mine mineFrom = Mines.getByLocation(event.getFrom());
-            Mine mineTo = Mines.getByLocation(event.getTo());
+            Mine mineFrom = mineHelper.getByLocation(event.getFrom());
+            Mine mineTo = mineHelper.getByLocation(event.getTo());
 
             if(mineFrom != null && mineTo == null) {
 

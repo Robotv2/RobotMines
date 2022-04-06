@@ -11,44 +11,42 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
 
-public class Mines {
+public class MineHelper {
 
-    private Mines() {}
+    private final Map<String, Mine> mines = new ConcurrentHashMap<>();
 
-    private static final Map<String, Mine> mines = new ConcurrentHashMap<>();
-
-    public static Collection<Mine> getMines() {
+    public Collection<Mine> getMines() {
         return mines.values();
     }
 
     @Nullable
-    public static Mine getByName(String name) {
+    public Mine getByName(String name) {
         Mine mine = mines.get(name.toLowerCase());
         if(mine == null)
-            mine = Mines.loadMine(name);
+            mine = this.loadMine(name);
         return mine;
     }
 
     @Nullable
-    public static Mine getByLocation(Location location) {
-        return Mines.getMines().stream()
+    public Mine getByLocation(Location location) {
+        return this.getMines().stream()
                 .filter(mine -> mine.contains(location))
                 .findFirst().orElse(null);
     }
 
-    public static boolean exist(String name) {
+    public boolean exist(String name) {
         return mines.containsKey(name.toLowerCase());
     }
 
     /**
      * Permit to check if a mine object is valid.
      */
-    public static boolean exist(Mine mine) {
+    public boolean exist(Mine mine) {
         return mine != null && exist(mine.getName());
     }
 
     @Nullable
-    public static Mine loadMine(String name) {
+    public Mine loadMine(String name) {
 
         name = name.toLowerCase();
         if(mines.containsKey(name)) {
@@ -69,17 +67,17 @@ public class Mines {
         return mine;
     }
 
-    public static void loadMines() {
+    public void loadMines() {
         ConfigurationSection section = RobotMines.get().getMinesFile().getConfigurationSection("");
 
         if(section == null) {
             return;
         }
 
-        section.getKeys(false).forEach(Mines::loadMine);
+        section.getKeys(false).forEach(this::loadMine);
     }
 
-    public static void deleteMine(Mine mine) {
+    public void deleteMine(Mine mine) {
         mines.remove(mine.getName());
         mine.stopTask();
         RobotMines.get().getMinesFile().set(mine.getName() + ".first-bound", null);

@@ -4,8 +4,8 @@ import co.aikar.commands.BaseCommand;
 import co.aikar.commands.annotation.*;
 import fr.robotv2.robotmines.RobotMines;
 import fr.robotv2.robotmines.mine.Mine;
+import fr.robotv2.robotmines.mine.MineHelper;
 import fr.robotv2.robotmines.mine.MineResetType;
-import fr.robotv2.robotmines.mine.Mines;
 import fr.robotv2.robotmines.ui.stock.MineMenuUi;
 import fr.robotv2.robotmines.util.ColorUtil;
 import org.bukkit.command.CommandSender;
@@ -14,11 +14,17 @@ import org.bukkit.entity.Player;
 @CommandAlias("mine")
 public class MineBaseCommand extends BaseCommand {
 
+    private final MineHelper mineHelper;
+
+    public MineBaseCommand(MineHelper mineHelper) {
+        this.mineHelper = mineHelper;
+    }
+
     @Subcommand("create")
     @CommandPermission("robotmines.command.create")
     public void onCreate(Player player, String mine) {
 
-        if(Mines.exist(mine)) {
+        if(mineHelper.exist(mine)) {
             ColorUtil.sendMessage(player, "&cCette mine existe déjà.");
             return;
         }
@@ -39,7 +45,7 @@ public class MineBaseCommand extends BaseCommand {
 
         try {
             Mine mine = RobotMines.get().getWandManager().getBuilder(player).build();
-            Mines.loadMine(mine.getName());
+            mineHelper.loadMine(mine.getName());
             ColorUtil.sendMessage(player, "&aVous venez de créer une nouvelle mine avec succès !");
         } catch (NullPointerException exception) {
             ColorUtil.sendMessage(player, "&cVous ne pouvez pas créer la mine: des éléments sont manquants.");
@@ -51,12 +57,12 @@ public class MineBaseCommand extends BaseCommand {
     @CommandCompletion("@mines")
     public void onDelete(CommandSender sender, Mine mine) {
 
-        if(!Mines.exist(mine)) {
+        if(!mineHelper.exist(mine)) {
             ColorUtil.sendMessage(sender, "&cCette mine n'existe pas.");
             return;
         }
 
-        Mines.deleteMine(mine);
+        mineHelper.deleteMine(mine);
         ColorUtil.sendMessage(sender, "&aVous venez de supprimer la mine: " + mine.getName());
     }
 
@@ -65,7 +71,7 @@ public class MineBaseCommand extends BaseCommand {
     @CommandCompletion("@mines")
     public void onReset(CommandSender sender, Mine mine, @Optional MineResetType type) {
 
-        if(!Mines.exist(mine)) {
+        if(!mineHelper.exist(mine)) {
             ColorUtil.sendMessage(sender, "&cCette mine n'existe pas.");
             return;
         }
@@ -82,7 +88,7 @@ public class MineBaseCommand extends BaseCommand {
     @CommandCompletion("@mines")
     public void onOpenMenu(Player player, Mine mine) {
 
-        if(!Mines.exist(mine)) {
+        if(!mineHelper.exist(mine)) {
             ColorUtil.sendMessage(player, "&cCette mine n'existe pas.");
             return;
         }
@@ -95,7 +101,7 @@ public class MineBaseCommand extends BaseCommand {
     @CommandCompletion("@mines")
     public void onInfo(Player player, Mine mine) {
 
-        if(!Mines.exist(mine)) {
+        if(!mineHelper.exist(mine)) {
             ColorUtil.sendMessage(player, "&cCette mine n'existe pas.");
             return;
         }
@@ -103,8 +109,8 @@ public class MineBaseCommand extends BaseCommand {
         int requiredBlock = (int) ((mine.getBlocks().size() - mine.getAirBlocks().size()) - (mine.getBlocks().size() * (mine.getResetPourcentage() / 100)));
 
         ColorUtil.sendMessage(player, "&8&l&m--------------", false);
-        ColorUtil.sendMessage(player, "&e&lBLOCS: &e" + mine.getBlocks().size(), false);
-        ColorUtil.sendMessage(player, "&e&lAIR: &e" + mine.getBlocks().size(), false);
+        ColorUtil.sendMessage(player, "&e&lBlocs: &e" + mine.getBlocks().size(), false);
+        ColorUtil.sendMessage(player, "&e&lAir: &e" + mine.getBlocks().size(), false);
         ColorUtil.sendMessage(player, "&e&lBloc(s) nécessaire(s): &e" + Math.max(0, requiredBlock), false);
         ColorUtil.sendMessage(player, "&8&l&m--------------", false);
     }
